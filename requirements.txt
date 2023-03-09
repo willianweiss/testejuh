@@ -1,0 +1,10 @@
+fastapi==0.89.1
+uvicorn==0.20.0
+SQLAlchemy>=1.4.32
+pyjwt==2.3.0
+python-dotenv==0.19.2
+psycopg2-binary==2.9.5
+alembic==1.9.2
+fastapi
+pytest
+httpx
