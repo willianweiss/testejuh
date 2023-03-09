@@ -1,0 +1,55 @@
+image: python:latest
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+stages:
+  - build
+  - lint
+  - test
+
+build:
+  stage: build
+  script:
+    - pip install virtualenv
+    - python -m virtualenv venv
+    - source venv/bin/activate
+  only:
+    - main
+    - merge_requests
+
+lint:
+  stage: lint
+  script:
+    - pip install virtualenv
+    - python -m virtualenv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+    - make lint
+  only:
+    - main
+    - merge_requests
+
+test:
+  stage: test
+  variables:
+    POSTGRES_URL: POSTGRES_URL
+    ACCESS_KEY: ACCESS_KEY
+    SECRET_KEY: SECRET_KEY
+    BUCKET_NAME: BUCKET_NAME
+  script:
+    - pip install virtualenv
+    - python -m virtualenv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+    - make test-cov
+  only:
+    - main
+    - merge_requests
+
+# Path: .gitlab-ci.yml
