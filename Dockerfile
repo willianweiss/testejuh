@@ -15,4 +15,4 @@ EXPOSE 8000
 
 # Run the Alembic upgrade command
 CMD alembic upgrade head && \
-  uvicorn main:app --host 0.0.0.0 --port 8002
+  uvicorn main:app --host 0.0.0.0 --port 8000

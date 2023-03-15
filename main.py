@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import taxi_fare_router
-from api.routers import login
+from api.routes import taxi_fare_router
+from api.routes import login
 
 
 def get_app() -> FastAPI:
     app = FastAPI()
-    app.include_router(taxi_fare_router.router)
     app.include_router(login.login_router)
+    app.include_router(taxi_fare_router.router)
     return app
 
 app = get_app()
