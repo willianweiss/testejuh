@@ -1,12 +1,13 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from api.auth.auth_bearer import JWTBearer
-from api.database.connection import get_db
-from api.models.schemas import TaxiFareCreate, TaxiFareUpdate, TaxiFare
+from api.database.connection import get_db, SessionLocal
+from api.models.schemas import TaxiFareCreate, TaxiFareUpdate, TaxiFare, BatchProcessRequest
 from api.models.taxi_fare_model import TaxiFareModel
 import pandas as pd
+
 
 router = APIRouter(
     tags=["taxi_fares"],
@@ -76,3 +77,28 @@ async def read_all_taxi_fares(
     db: Session = Depends(get_db),
 ):
     return db.query(TaxiFareModel).all()
+
+@router.post("/batch_process")
+async def batch_process(batch_request: BatchProcessRequest, background_tasks: BackgroundTasks):
+    background_tasks.add_task(process_parquet_files, batch_request.parquet_files)
+    return {"message": "Batch processing started"}
+
+async def process_parquet_files(parquet_file_urls: List[str]):
+    df = pd.concat([pd.read_parquet(url) for url in parquet_file_urls])
+
+    db = SessionLocal()
+    try:
+        for index, row in df.iterrows():
+            taxi_fare = TaxiFare(
+                pickup_datetime=row["pickup_datetime"],
+                pickup_longitude=row["pickup_longitude"],
+                pickup_latitude=row["pickup_latitude"],
+                dropoff_longitude=row["dropoff_longitude"],
+                dropoff_latitude=row["dropoff_latitude"],
+                passenger_count=row["passenger_count"],
+                fare_amount=row["fare_amount"],
+            )
+            db.add(taxi_fare)
+            db.commit()
+    finally:
+        db.close()

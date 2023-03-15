@@ -33,18 +33,7 @@ class TaxiFare(TaxiFareBase):
 class TaxiFareList(BaseModel):
     __root__: List[TaxiFare]
 
-
-# Definição dos modelos de entrada/saída para o script de batch
-
-class TaxiFareBatch(BaseModel):
-    pickup_datetime: str
-    pickup_longitude: float
-    pickup_latitude: float
-    dropoff_longitude: float
-    dropoff_latitude: float
-    passenger_count: int
-    fare_amount: float
+class BatchProcessRequest(BaseModel):
+    parquet_files: List[str]
 
 
-class TaxiFareBatchList(BaseModel):
-    TaxiFares: List[TaxiFareBatch]
